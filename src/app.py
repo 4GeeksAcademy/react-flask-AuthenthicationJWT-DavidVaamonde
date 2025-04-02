@@ -10,6 +10,8 @@ from api.models import db
 from api.routes import api
 from api.admin import setup_admin
 from api.commands import setup_commands
+import datetime
+from flask_jwt_extended import JWTManager
 
 # from models import Person
 
@@ -40,8 +42,23 @@ setup_commands(app)
 # Add all endpoints form the API with a "api" prefix
 app.register_blueprint(api, url_prefix='/api')
 
-# Handle/serialize errors like a JSON object
+# Clave para JWT, está en .env
+app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET")
 
+# Configurar la fecha de expiración del token
+app.config["JWT_ACCESS_TOKEN_EXPIRES"] = datetime.timedelta(days=1)
+
+# Indica donde hay quen enviar el token
+app.config["JWT_TOKEN_LOCATION"] = ["headers"]
+
+# Configurar el formato del token
+app.config["JWT_HEADER_NAME"] = "Authorization"
+app.config["JWT_HEADER_TYPE"] = "Bearer"
+
+# Inicialización del gestor JWT
+jwt = JWTManager(app)
+
+# Handle/serialize errors like a JSON object
 
 @app.errorhandler(APIException)
 def handle_invalid_usage(error):
